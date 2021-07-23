@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <img src="" alt="" width='187' height='333' class='img'>
+</head>
+<body>
+<script src="app_1.js"></script></body>
+<script>
+    let canvas=document.querySelector('canvas')
+    let img=document.querySelector('.img')
+    let a={
+            c:{
+                type:'background-img',
+                src:'https://wechatapppro-1252524126.file.myqcloud.com/appsczltY5m2327/image/b_u_5b2225aa46488_oGKN7IvA/kq63db8o0ppk.jpg',
+                x:0,
+                y:0,
+                width:187,
+                height:333,
+            },
+            a:{
+                type:'img',
+                src:'http://wechatapppro-1252524126.file.myqcloud.com/apppcXiaoeT6666/file/YXBwbW9kdWxlZGVmYXVsdC13ZXdvcmstdXNlci1hdmF0YXItdV8xMjM0NTY3ODkxMDExXzEyMzQ1Njc4OTEtZTNVYnJ1YWs.jpg',
+                x:0,
+                y:0,
+                width:28,
+                height:28,
+            },
+            b:{
+                type:'img',
+                src:'http://wechatapppro-1252524126.file.myqcloud.com/appwjxwhmzv7002/image/a875d0be3c15887e0904d9e7625be878.png',
+                x:133,
+                y:279,
+                width:44,
+                height:44,
+            },
+            d:{
+                type:'font',
+                size:'12',
+                x:32,
+                y:0,
+                value:'112321',
+            }
+        }
+    let ddd=new objToPoster(a,187,333,10).convertToImg().then(res=>{
+        img.src=res
+    });
+   
+    
+</script>
+</html>
+<style>
+</style>
