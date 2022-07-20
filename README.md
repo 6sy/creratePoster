@@ -1,3 +1,10 @@
+### 介绍：
+最好的海报生成组件：
+- 生成速度快于html2canvas
+- 生成图片质量高于html2canvas
+- 代码结构更简洁,代码量更小,不需要html元素和css
+- 组件更小，只有4kb,远小于html2canvas的200kb
+
 ### 示例演示
 1.webpack方式:
 npm i
@@ -6,8 +13,11 @@ npm run dev
 2.手动引入：
 在src/index.html手动引入dist/main.js
 
-### 引入
-
+### 引入:
+```
+npm install createPoster --save
+import createPoster from 'createPoster';
+```
 ### 用法：
 ```
 const config ={ width: 300, height: 700, suffix: 'jpeg', scale: 5 }
@@ -89,4 +99,6 @@ createPoster(conifg, posterElements).then(res => {
 - 支持文字单行最大长度，自动换行
 - 支持用户自定义操作
 
+#### 修复问题
+- 1.0.1:修复文字不传lineHeight不展示换行文字
 
