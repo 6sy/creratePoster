@@ -1,22 +1,45 @@
-// obj img font shape
-import { drawImage, drawFont } from "./utils/drawImage.js";
-let TYPES = ["background-img", "img", "font"];
-class objToPoster {
-    // posterObj-元素对象 imgWidth-图片宽（单位默认px） imgHeight-图片长（单位默认px） proportion（图片精度-越大精度越高）
-    constructor(posterObj, imgWidth = 300, imgHeight = 700, proportion = 1) {
+import { drawImage, drawFont,clipPreviousHandle } from "./utils/drawImage.js";
+
+/**
+ * @method ：
+ * @param {object} config Poster Configuration information
+ * @param {number} config.width  Generate the width of the picture poster
+ * @param {number} config.height  Generate the height of the picture poster
+ * @param {number} config.scale  Posters quality
+ * @param {number} config.suffix  生成图片类型
+ * @param {array} ele
+ * @param {object[]} posterElement Poster element
+ * @param {string} posterElement.type  image | font | custom
+ * @param {number} posterElement.width  The wdith of the image in the poster when the type is image
+ * @param {number} posterElement.height  The height of the image in the poster when the type is image
+ * @param {number} posterElement.borderRadius The border radius of the image in the poster when the type is image
+ * @param {number} posterElement.src   Picture address
+ * @param {number} posterElement.top   the top of the poster 
+ * @param {number} posterElement.left   the left of the poster 
+ * @param {number} posterElement.size  font size
+ * @param {string} posterElement.color  font color
+ * @param {string} posterElement.family  font family
+ * @param {string} posterElement.maxWidth  Maximum length of a line of text
+ * @param {string} posterElement.lineHeight  font line-height
+ * @param {string} posterElement.textBaseline  font alignment
+ * @param {function} posterElement.fn  custom function
+ * @param {array} ele Array of poster elements
+ * @return {promise} Return a Promise object,receive a base64 image
+ */
+function createPoster(config, ele) {
+    const instance = new poster(config);
+    return instance.outputImg(ele);
+}
+class poster {
+    constructor(config = { width: 300, height: 700, suffix: 'jpeg', scale: 5 }) {
+        this.suffixArray = ['png', 'webp', 'jpeg'];
+        this.canvasConifg = config;
         this.ctx = null;
         this.canvas = null;
-        // 生成的海报
-        this.img = null;
-        this.proportion = proportion;
-        // 绘制的所有图片 文字默认再图片上面 == 所以先画图片再画文字的
-        this.posterImages = [];
-        // 绘制所有的文字
-        this.posterFonts = [];
-        // 初始化canvas元素
-        this.initCanvas(imgWidth * proportion, imgHeight * proportion);
-        // 初始化传入的对象    为什么要做这一步:绘图的先后顺序
-        this.initPosterObj(posterObj);
+        this.scale = config.scale || 1;
+        this.posterBase64 = null; // The final poster is base64
+        this.initCanvas(config.width, config.height); // Initialize the canvas element
+
     }
     initCanvas(width, height) {
         let canvas = document.createElement("canvas");
@@ -26,80 +49,62 @@ class objToPoster {
         canvas.style["top"] = 0;
         canvas.style["left"] = 0;
         canvas.style["display"] = "none";
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = width * this.scale;
+        canvas.height = height * this.scale;
         document.body.appendChild(canvas);
         this.ctx = canvas.getContext("2d");
-        console.log("init-canvas is ok");
+
     }
-    // 将对象转换成一个数组按照绘画顺序的
-    initPosterObj(posterObj) {
-        let objNames = Object.keys(posterObj);
-        for (let i = 0; i < objNames.length; i++) {
-            // 背景图片
-            if (posterObj[objNames[i]].type === TYPES[0]) {
-                this.posterImages.unshift(posterObj[objNames[i]]);
+    initImage(ele) {
+        const imagePromise = [];
+        ele.filter((item, index) => {
+            if (item.type == 'img') {
+                const p = new Promise((res, rej) => {
+                    let img = new Image();
+                    img.crossOrigin = "anonymous";
+                    img.src = ele[index].src;
+                    img.onload = function () {
+                        item.imgElement = img;
+                        res(true);
+                    };
+                })
+                imagePromise.push(p)
+                return true
             }
-            // 普通图片
-            if (posterObj[objNames[i]].type === TYPES[1]) {
-                this.posterImages.push(posterObj[objNames[i]]);
+        })
+        return Promise.all(imagePromise);
+    }
+    draw(ele) {
+        ele.forEach((element, index) => {
+            console.log(element)
+            if (element.type == 'img') {
+                drawImage(this.ctx, element, this.scale)
             }
-            // 文字
-            if (posterObj[objNames[i]].type === TYPES[2]) {
-                this.posterFonts.push(posterObj[objNames[i]]);
+            else if (element.type == 'custom') {
+                this.ctx.beginPath();
+                clipPreviousHandle(this.ctx);
+                element.callback(this.ctx);
             }
-        }
-    }
-    // 初始化所有的图片资源
-    initImages(arr) {
-        let imgLoadPromise = [];
-        for (let j = 0; j < arr.length; j++) {
-            let p = new Promise((resolve, reject) => {
-                let img = new Image();
-                img.crossOrigin = "anonymous";
-                img.src = arr[j].src;
-                img.onload = function () {
-                    console.log("img-onload");
-                    arr[j].imgOnload = img;
-                    resolve(true);
-                };
-            });
-            imgLoadPromise.push(p);
-        }
-        return Promise.all(imgLoadPromise);
-    }
-    // 开始画画
-    draw(ctx, arr) {
-        this.drawImgs();
-        this.drawFonts();
-    }
-    drawImgs() {
-        for (let i = 0; i < this.posterImages.length; i++) {
-            drawImage(this.ctx, this.posterImages[i], this.proportion);
-        }
-    }
-    drawFonts() {
-        for (let i = 0; i < this.posterFonts.length; i++) {
-            drawFont(this.ctx, this.posterFonts[i], this.proportion);
-        }
-    }
-    convertToImg() {
-        return new Promise(async (res, rej) => {
-            try {
-                await this.initImages(this.posterImages);
-                this.draw();
-                this.img = this.canvas.toDataURL("image/jpeg");
-                this.clearCanvas();
-                res(this.img);
-            } catch (e) {
-                console.error(e);
+            else if (element.type == 'font') {
+                drawFont(this.ctx, element, this.scale)
             }
         });
     }
-    clearCanvas() {
-        this.canvas.remove();
+    toConverImg() {
+        let suffix = this.canvasConifg.suffix || 'jpeg';
+        if (!this.suffixArray.includes(suffix)) {
+            console.error("The image type can only be PNG, JPEG, or WebP");
+            return;
+        }
+        return this.canvas.toDataURL(`image/${suffix}`, 1.0);
+    }
+    async outputImg(ele) {
+        await this.initImage(ele);
+        this.draw(ele);
+        this.posterBase64 = this.toConverImg();
+        return this.posterBase64
     }
 }
 
-export default objToPoster;
-window.objToPoster = objToPoster
+export default createPoster;
+window.createPoster = createPoster;

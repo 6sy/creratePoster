@@ -1,11 +1,11 @@
 {
   "name": "day1",
   "version": "1.0.0",
-  "main": "webpack.config.js",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack",
-    "dev": "webpack-dev-server"
+    "dev": "webpack-dev-server",
+    "build":"webpack"
   },
   "author": "",
   "license": "ISC",

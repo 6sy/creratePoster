@@ -1,25 +1,23 @@
-const { resolve } = require("path");
+const path  = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 // 自定义模块
-let allModules={
-    0:'src',
-    1:'diff_vnode',
-    2:'poster_test'
-}
-let customModule=allModules[0]
 module.exports = {
-    mode: "development",
+    mode: "production",
     devServer: {
         contentBase: "./build",
         port: 9001,
         open: true
     },
-    entry: {
-        app_1: `./${customModule}/index.js`
+    entry:{
+        main:'./src/index.js',
+        esm:'./src/index.js'
     },
-    output: {
-        filename: "[name].js",
-        path: resolve(__dirname, "build")
+    output:{
+            library: 'createPoster',
+            libraryTarget: 'umd',
+            libraryExport: 'default', // libraryExport改为webpackDemo
+            path: path.resolve(__dirname, 'dist'),
+            filename: '[name].js'
     },
     module: {
         rules: [
@@ -40,7 +38,7 @@ module.exports = {
     plugins: [
         // html
         new HtmlWebpackPlugin({
-            template: `./${customModule}/index.html`
+            template: `./src/index.html`
         })
     ]
 };
