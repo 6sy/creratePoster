@@ -1,3 +1,10 @@
+
+### 引入:
+```
+npm install create-poster --save
+import createPoster from 'create-poster';
+```
+
 ### 介绍：
 最好的海报生成组件：
 - 生成速度快于html2canvas
@@ -13,11 +20,6 @@ npm run dev
 2.手动引入：
 在src/index.html手动引入dist/main.js
 
-### 引入:
-```
-npm install createPoster --save
-import createPoster from 'createPoster';
-```
 ### 用法：
 ```
 const config ={ width: 300, height: 700, suffix: 'jpeg', scale: 5 }
@@ -50,6 +52,14 @@ const posterElements = [
         size: 20
     }
 ]
+
+// 自定义绘制函数
+function draw(ctx) {
+    ctx.moveTo(10, 10);
+    ctx.lineTo(500, 500)
+    ctx.stroke();
+}
+
 createPoster(conifg, posterElements).then(res => {
     img.src = res;
 })
@@ -98,6 +108,7 @@ createPoster(conifg, posterElements).then(res => {
 - 支持图片圆角
 - 支持文字单行最大长度，自动换行
 - 支持用户自定义操作
+- 支持海报的压缩
 
 #### 修复问题
 - 1.0.1:修复文字不传lineHeight不展示换行文字
